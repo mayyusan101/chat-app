@@ -1,0 +1,59 @@
+.switch__title{
+    margin-top: 10px;
+    margin-left: 10px;
+}
+/*=== Switch Chat ===*/
+.switch__chat{
+    padding: 0.5rem;
+}
+.switch__chat__menu{
+    border-bottom: 1px solid gray;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.switch__chat__menu button{
+    border: none;
+    outline: none;
+    padding: 10px 10px;
+    flex: 1;
+    cursor: pointer;
+}
+.switch__chat__menu .active{
+    background-color: rgb(91, 23, 163);
+    color: wheat;
+}
+
+/*=== Search ===*/
+.search__chat{
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin: 5px 0;
+}
+.search__chat__form{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 5px;
+}
+.search__chat__form input{
+    width: 60%;
+    padding: 5px 10px;
+    border: none;
+    outline: none;
+}
+.search__icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.search__icon:hover{
+    background-color: aquamarine;
+}

@@ -1,0 +1,41 @@
+
+.receiver__message{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sender__message{
+    display: flex;
+    flex-direction: row-reverse; /* sender is reverse */
+    align-items: center;
+    gap: 10px;
+}
+.receiver__message img,
+.sender__message img{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    align-self: flex-end;
+}
+/* .sender__message img{
+    align-items: flex-start;
+} */
+.message__box{
+    padding: 0.5rem 0.4rem 0.5rem 0.5rem;
+    background-color: antiquewhite;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: end;
+}
+.person__text{
+    font-weight: 500;
+}
+.message__time{
+    font-size: 8px;
+    opacity: 0.8;
+    word-spacing: 1px;
+}
+

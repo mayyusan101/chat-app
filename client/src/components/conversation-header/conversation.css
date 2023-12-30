@@ -1,0 +1,22 @@
+.conversation__header{
+    padding: 0.5rem 1rem;
+    background-color: white;
+    height: 55px; /* Conversation Header Height */
+}
+.conversation__person{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.conversation__person img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+}
+.conversation__header .img_left{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
