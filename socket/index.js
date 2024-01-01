@@ -32,20 +32,22 @@ io.on("connection", (socket) => {
   // Event handler for the "userConnected" event
   socket.on('userConnected', (userId) => {
     connectedUsers[socket.id] = userId; // Store the user in the connectedUsers object
-  
   // Emit Online Users
   io.emit("connectedUsers", Object.values(connectedUsers));   
   });
 
   // listen for room
-  socket.on("roomChat", ({roomName, roomId, userId}) => {
-    console.log({roomName, userId});
+  socket.on("roomChat", ({membersIds, roomId, userId}) => {
     socket.join(roomId); // join room
-    console.log(`User ${userId} joined room ${roomName} roomId - ${roomId}`);
-    roomUsers[socket.id] = {
-      userId,
-      roomId
-    };
+  
+    console.log("connectedUsers in socket", connectedUsers);
+    membersIds?.map(member => {
+      for (const [socketId, userId] of Object.entries(connectedUsers)) {
+        if(member.id === userId){
+          io.to(socketId).emit("roomChat");
+        }
+      };
+    });
     io.to(roomId).emit("roomChat");
   });
 
@@ -54,7 +56,7 @@ io.on("connection", (socket) => {
       senderId,
       text,
     }
-    console.log(`Emit roomMessage Event with the text of ${text}`);
+
     io.to(roomId).emit("roomMessage", details); // emit message
   })
 
@@ -77,7 +79,6 @@ io.on("connection", (socket) => {
 
  // Disconnect event
  socket.on('disconnect', () => {
-  console.log(`User disconnected: ${socket.id}`);
   // Remove the user from the connectedUsers object
   delete connectedUsers[socket.id];
   delete roomUsers[socket.id];

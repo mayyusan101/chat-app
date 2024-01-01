@@ -1,20 +1,23 @@
 import { useContext, useEffect } from "react";
 import { personLogo } from "../../../utils/import";
-import { fetchRoomConversation } from "../../api/api";
-import "./room-chat.css";
-import { ConversationContext } from "../../context/ConversationConext";
+import { fetchRoomConversationFromDB } from "../../api/api";
 import socket from "../../services/socketService";
-import { getUser } from "../../../utils/localStorage";
+import { useDispatch } from "react-redux";
+import { setConversation } from "../../store/features/conversationSlice";
+import { setMessages } from "../../store/features/messageSlice";
+import { AuthContext } from "../../context/AuthContext";
+import "./room-chat.css";
+
 
 export const RoomChat = ({room}) => {
-  const { setConversation } = useContext(ConversationContext);
-  const currentUser = getUser();
+  const currentUser = useContext(AuthContext);
+  const dispatch = useDispatch();
+
   const fetchConversation = async () => {
     try {
-      const response = await fetchRoomConversation(room._id);
-      // set convesation data
-      console.log('fetchRoomConversation response', response);
-      setConversation({ ...response });
+      const response = await fetchRoomConversationFromDB(room._id);
+      dispatch(setConversation(response.data)); // set conversation data to store
+      dispatch(setMessages(response.messages)); // set messages to store
     } catch (error) {
       console.log(error);
     }
@@ -26,7 +29,8 @@ export const RoomChat = ({room}) => {
       userId: currentUser._id,
       roomId: room._id
     });
-  },[])
+  },[]);
+  
   return (
     <div className="room__person" onClick={fetchConversation}>
       <img src={personLogo} alt="person" className="img" />

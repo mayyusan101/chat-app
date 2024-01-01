@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { CreateRoom, RoomChat } from "../../../utils/import";
+import { useSelector } from "react-redux";
+import { RoomChat } from "../../../utils/import";
 import "./all-room.css";
-import { fetchAllRooms } from "../../api/api";
 
-export const AllRooms = ({ allUsers, allRooms }) => {
 
+export const AllRooms = () => {
+  const allRooms = useSelector(state => state.chatUsers.allRooms); // reterive all rooms from store
+  
   return (
     <div className="room__container">
       {allRooms &&

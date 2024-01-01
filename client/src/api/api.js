@@ -1,6 +1,6 @@
 import api from "../services/apiService";
 
-const fetchAllUsers = async () => {
+const fetchAllUsersFromDB = async () => {
   try {
     const response = await api('/users');
       return response.data.data.users;
@@ -10,7 +10,7 @@ const fetchAllUsers = async () => {
   }
 };
 
-const fetchAllRooms = async () => {
+const fetchAllRoomsFromDB = async () => {
   try {
     const response = await api.get('/rooms');
     return response.data.data;
@@ -21,7 +21,7 @@ const fetchAllRooms = async () => {
 };
 
 // send message
-const postMessage = async ({ message, conversationId }) => {
+const postMessageToDB = async ({ message, conversationId }) => {
   try {
     const response = await api.post(
       '/messages',
@@ -39,7 +39,7 @@ const postMessage = async ({ message, conversationId }) => {
 };
 
 // room one
-const fetchRoomConversation = async (roomId) => {
+const fetchRoomConversationFromDB = async (roomId) => {
   try {
     const response = await api.get(`/rooms/${roomId}`);
     return response.data;
@@ -50,7 +50,7 @@ const fetchRoomConversation = async (roomId) => {
 };
 
 // chat one
-const fetchChatConversation = async (receiverId) => {
+const fetchChatConversationFromDB = async (receiverId) => {
   try {
     const response = await api.post(
       '/chat',
@@ -65,7 +65,7 @@ const fetchChatConversation = async (receiverId) => {
   }
 };
 
-const createRoom = async ({ roomName, users }) => {
+const createRoomToDB = async ({ roomName, users }) => {
   try {
     const response = await api.post(
       '/rooms',
@@ -81,7 +81,7 @@ const createRoom = async ({ roomName, users }) => {
   }
 };
 
-const leaveRoom = async ({ roomId, userId }) => {
+const leaveRoomToDB = async ({ roomId }) => {
   try {
     const response = await api.post(
       '/rooms/leave',
@@ -96,5 +96,37 @@ const leaveRoom = async ({ roomId, userId }) => {
   }
 };
 
+const removeRoomToDB = async ({ roomId }) => {
+  try {
+    const response = await api.post(
+      '/rooms/remove',
+      {
+        roomId
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching leave room data:", error);
+    throw error;
+  }
+};
 
-export { fetchAllUsers, fetchChatConversation, postMessage, fetchAllRooms, createRoom, fetchRoomConversation, leaveRoom };
+const logout = async (userId) => {
+  try {
+    const response = await api.post(
+      '/auth/logout',
+      {
+        userId: userId
+      }
+    );
+    console.log("logout respone", logout);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching leave room data:", error);
+    throw error;
+  }
+};
+
+
+
+export { fetchAllUsersFromDB, fetchChatConversationFromDB, postMessageToDB, fetchAllRoomsFromDB, createRoomToDB, fetchRoomConversationFromDB, leaveRoomToDB, removeRoomToDB, logout };

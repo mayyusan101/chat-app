@@ -1,45 +1,64 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { personLogo } from "../../../utils/import";
+import { useDispatch, useSelector } from "react-redux";
+import { clearConversation } from "../../store/features/conversationSlice";
+import { leaveRoomToDB, removeRoomToDB } from "../../api/api";
+import { leaveRoom } from "../../store/features/chatUsersSlice";
+import { AuthContext } from "../../context/AuthContext";
 import "./conversation.css";
-import { ConversationContext } from "../../context/ConversationConext";
-import { fetchAllRooms, leaveRoom } from "../../api/api";
-import { getUser } from "../../../utils/localStorage";
 
-export const ConversationHeader = ({activeUsers, setAllRooms}) => {
-  const { conversation, setConversation } = useContext(ConversationContext);
-  const [ online, setOnline ] = useState(false);
-  const [ name, setName ] = useState("");
 
-  const currentUser = getUser();
+export const ConversationHeader = () => {
+  const conversation = useSelector(state => state.conversation);
+  const onlineUsers = useSelector(state => state.chatUsers.onlineUsers);
+
+  const dispatch = useDispatch();
+  const [name, setName] = useState("");
+  const [online, setOnline] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+ const currentUser = useContext(AuthContext);
+
   useEffect(() => {
-    if(conversation.data?.isRoom === true){
-      const roomName = conversation.data.name;
-      setName(roomName);
+    if(conversation.isRoom === true){
+      const roomName = conversation.name;
+      setName(roomName); // display room name
       setOnline(false);
+      if(conversation.roomAdmin._id === currentUser._id){
+        setIsAdmin(true); // admin user
+      }else{
+        setIsAdmin(false); // member user
+      }
     }else{
-      const userName = conversation.data?.users[0].name;
+      const userName = conversation?.users[0].name; // display chat user name
       setName(userName);
-      // check online or not
-      const usersId = conversation.data?.users[0]._id;
-      const isExist = activeUsers?.find(user => user._id === usersId);
-      console.log({isExist, userName});
-      if(isExist) setOnline(true);
+      // check user is online or not
+      const userId = conversation?.users[0]._id;
+      const isExist = onlineUsers?.find(user => user._id == userId);
+      isExist? setOnline(true) : setOnline(false);
     }
-  }, [conversation,activeUsers]);
+  }, [conversation,onlineUsers]);
 
-  const fetchRoom = async() => {
-    const rooms = await fetchAllRooms(); // fetch rooms
-    setAllRooms(rooms);
-    return rooms;
-  }
-  
+  // leave room
   const handleLeaveRoom = async() => {
-    if(conversation.data?.isRoom===true){
-      setConversation(null); // clear conversation
-      await leaveRoom({
-        roomId: conversation.data._id
+    if(conversation.isRoom === true){
+      const roomId = conversation._id;
+      dispatch(clearConversation()); // clear conversation
+      dispatch(leaveRoom(roomId));
+      await leaveRoomToDB({
+        roomId: roomId
       });
-      await fetchRoom();
+    }
+  }
+  // delete room if user is admin
+  const handleRemoveRoom = async() => {
+    if(conversation.isRoom === true && isAdmin){
+      const roomId = conversation._id;
+      dispatch(clearConversation()); // clear conversation
+      dispatch(leaveRoom(roomId));
+      await removeRoomToDB({
+        roomId: roomId
+      });
     }
   }
 
@@ -51,12 +70,15 @@ export const ConversationHeader = ({activeUsers, setAllRooms}) => {
           <img src={personLogo} alt="person" className="img" />
           <div className="">
             <h2 className="person__name">{name}</h2>
-            {!conversation.data.isRoom && <p className="person__text">{online ? "online" : "offline"}</p>}
+            {!conversation.isRoom && <p className="person__text">{online ? "online" : "offline"}</p>}
           </div>
         </div>
-        <div className="leave__room__btn" onClick={handleLeaveRoom}>
-          <button>Leave</button>
-        </div>
+        {
+          conversation.isRoom && (
+          <div className="leave__room__btn">
+            {isAdmin ? <button onClick={handleRemoveRoom}>Remove</button> : <button onClick={handleLeaveRoom}>Leave</button>}
+          </div>)
+        }
       </div>
     </div>
   );

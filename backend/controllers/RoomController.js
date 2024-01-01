@@ -1,6 +1,6 @@
 const Chat = require("../models/chat");
 const mongoose = require("mongoose");
-const { getMessages } = require("./MessageController");
+const { getMessages, deleteMessages } = require("./MessageController");
 
 const getAllRooms = async (req, res, next) => {
   const currentUser = req.user._id;
@@ -77,17 +77,39 @@ const leaveRoom = async(req, res, next) => {
   const currentUser = req.user;
 
   const room = await Chat.findById(new mongoose.Types.ObjectId(roomId));
-  const newUsers = room.users.filter(user => user._id !== currentUser._id);
-  await Chat.findByIdAndUpdate(currentUser._id, { users: newUsers });
+  const newUsers = room.users.filter(user => user._id.toString() !== currentUser._id.toString());
+  console.log("new users", newUsers);
+  await Chat.findByIdAndUpdate(roomId, { users: newUsers });
 res
   .status(200)
   .json({ message: "success"});
 
 }
 
+const removeRoom = async(req, res, next) => {
+  const roomId = req.body.roomId;
+  const currentUser = req.user;
+
+  const room = await Chat.findById(new mongoose.Types.ObjectId(roomId));
+  // check if users is admin or not
+  if(room.roomAdmin.toString() === currentUser._id.toString()){
+    await Chat.deleteOne({ _id: roomId }); // delete chat
+    await deleteMessages(roomId);          // delete messages
+    res
+    .status(200)
+    .json({ message: "success"});
+  }else{
+    res.status(403).json({ message: "you are not an admin"});
+  }
+  
+}
+
+
+
 module.exports = {
   createRoom,
   getAllRooms,
   getRoomConversation,
-  leaveRoom
+  leaveRoom,
+  removeRoom
 };

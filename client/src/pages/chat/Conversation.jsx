@@ -1,24 +1,22 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ChatInput, ConversationHeader, Message } from "../../../utils/import";
-import "./chat.css";
-import { ConversationContext } from "../../context/ConversationConext";
 import socket from "../../services/socketService";
+import { useDispatch, useSelector } from "react-redux";
+import { sendMessage } from "../../store/features/messageSlice";
+import "./chat.css";
 
-export const Conversation = ({activeUsers, setAllRooms, isModalOpen}) => {
-  const { conversation } = useContext(ConversationContext);
-  const [chatMessages, setChatMessages] = useState([]);
+export const Conversation = ({isModalOpen}) => {
+
   const scrollRef = useRef();
   const conversationRef = useRef();
+  const dispatch = useDispatch();
 
-  // for all messages
-  useEffect(() => {
-    setChatMessages(conversation?.messages);
-  }, [conversation]);
+  const messages = useSelector(state => state.messages.messages);
 
   // for message auto scroll
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+  }, [messages]);
 
   // for show&hide when modal is open
   useEffect(() => {
@@ -30,14 +28,9 @@ export const Conversation = ({activeUsers, setAllRooms, isModalOpen}) => {
     }
   }, [isModalOpen]);
 
-  // for append directly in UI
-  const handleSendMessage = (message) => {
-    setChatMessages((prev) => [...prev, message]);
-  };
-
   // socket
   useEffect(() => {
-    // chat message
+    // listen for chat message
     socket.on("sendMessage",({senderId, text}) => {
       const message = {
         text:text,
@@ -46,9 +39,9 @@ export const Conversation = ({activeUsers, setAllRooms, isModalOpen}) => {
         },
         _id: Math.random(10000)
       };
-      setChatMessages((prev) => [...prev, message]);
+      dispatch(sendMessage(message));
     });
-    // room message
+    // listen for room message
     socket.on("roomMessage",({senderId, text}) => {
       const message = {
         text:text,
@@ -57,27 +50,23 @@ export const Conversation = ({activeUsers, setAllRooms, isModalOpen}) => {
         },
         _id: Math.random(10000)
       };
-      setChatMessages((prev) => [...prev, message]);
+      dispatch(sendMessage(message));
     });
   },[]);
 
   return (
     <div>
-      <ConversationHeader activeUsers={activeUsers} setAllRooms={setAllRooms}/>
+      <ConversationHeader/>
       <div className="conversation__container" ref={conversationRef}>
         <div className="messages__container">
-          {chatMessages &&
-            chatMessages.map((m) => (
+          {messages &&
+            messages.map((m) => (
               <div ref={scrollRef} key={m._id}>
                 <Message message={m} />
               </div>
             ))}
         </div>
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          conversationType={conversation.type}
-          conversationId={conversation.data._id}
-        />
+        <ChatInput/>
       </div>
     </div>
   );

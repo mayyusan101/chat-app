@@ -2,6 +2,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const saltRounds = 10; // the more greater, the more it longs
 const { generateAccessToken } = require("../config/token");
+const { default: mongoose } = require("mongoose");
 
 
 const login = async (req, res, next) => {
@@ -59,7 +60,25 @@ const register = async (req, res, next) => {
   };
 };
 
+const logout = async (req, res, next) => {
+  try {
+    const userId = req.body.userId;
+    const currentUser = await User.findById(new mongoose.Types.ObjectId(userId));
+    if (!currentUser) {
+      res.status(404).json({ message: "Invalid user" });
+    }
+    // regenerate token
+    const newToken = generateAccessToken(currentUser.email);
+     await User.findByIdAndUpdate(currentUser._id, { token: newToken }, { new: true });
+    res.status(200).json({message:"Logout success"});
+  } catch (err) {
+    return next(err);
+  }
+};
+
+
 module.exports = {
   login,
   register,
+  logout
 };

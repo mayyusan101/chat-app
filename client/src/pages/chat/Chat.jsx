@@ -6,58 +6,50 @@ import {
   AllRooms,
   CreateRoom,
 } from "../../../utils/import";
-import "./chat.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
-  fetchAllRooms,
-  fetchAllUsers,
+  fetchAllRoomsFromDB,
+  fetchAllUsersFromDB,
 } from "../../api/api";
 import socket from "../../services/socketService";
-import { getUser } from "../../../utils/localStorage";
-import { ConversationContextProvider } from "../../context/ConversationConext";
+import { useDispatch, useSelector } from "react-redux";
+import { setAllUsers, setAllRooms, setOnlineUsers } from "../../store/features/chatUsersSlice";
+import { AuthContext } from "../../context/AuthContext";
+import "./chat.css";
 
 const CHAT_TYPE = {
   chat: "chat",
   room: "room"
 }
 
+
 export const Chat = () => {
-  const [allUsers, setAllUsers] = useState([]);
-  const [allRooms, setAllRooms] = useState(null);
-  const [conversation, setConversation] = useState(null); // chat details
-  const [onlineUsers, setOnlineUsers] = useState([]);
+
   const [chatType, setChatType] = useState(CHAT_TYPE.chat);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const currentUser = getUser();
+  const currentUser = useContext(AuthContext);
+  const conversationId = useSelector(state => state.conversation._id);
+  const dispatch = useDispatch();
 
   // fetch all users
   useEffect(() => {
     const fetchUsers = async() => {
-      const users = await fetchAllUsers(); // fetch users
-      setAllUsers(users);
+      const users = await fetchAllUsersFromDB(); // fetch users
+      dispatch(setAllUsers(users)); // set all users to store
       return users;
     }
     const fetchRooms = async() => {
-      const rooms = await fetchAllRooms(); // fetch rooms
-      setAllRooms(rooms);
+      const rooms = await fetchAllRoomsFromDB(); // fetch rooms
+      dispatch(setAllRooms(rooms)); // set all rooms to store
       return rooms;
     }
     fetchUsers(); // initial fetch users
     fetchRooms(); // initial fetch rooms
-
+  
     socket.emit("userConnected", currentUser._id);
-    socket.on("connectedUsers", async(connectedUsers) => {
-      const fetchedUsers = await fetchUsers(); // refetch users
-      const connectedUserIds = {};
-      const users = [];
-      fetchedUsers.map((user) => {
-        const isExist = connectedUsers.includes(user._id) && !connectedUserIds.hasOwnProperty(user._id);
-        if (isExist) {
-          users.push(user);
-          connectedUserIds[user._id] = user.name;
-        }
-      });
-      setOnlineUsers(users); // refresh onlineUsers
+    socket.on("connectedUsers", async(connectedUsersArray) => {
+      await fetchUsers(); // refetch users
+      dispatch(setOnlineUsers(connectedUsersArray)); // set online users to store
     });  
     socket.on("roomChat", async() => {
       await fetchRooms(); // refetch rooms
@@ -75,30 +67,28 @@ export const Chat = () => {
 
   return (
     <div>
-      <ConversationContextProvider value={{ conversation, setConversation }}>
         <div className="chat__container">
           <div className="chat__side">
             <SwitchChat chatType={chatType} onSwitchChatType={handleChatType} />
-            {chatType === CHAT_TYPE.chat && (<AllUsers allUsers={allUsers} />)}
+            {chatType === CHAT_TYPE.chat && (<AllUsers/>)}
             {chatType === CHAT_TYPE.room && (
               <>
-              <CreateRoom allUsers={allUsers} onModalOpen={handleModalOpen} />
-              <AllRooms allUsers={allUsers} allRooms={allRooms} />
+              <CreateRoom onModalOpen={handleModalOpen}/>
+              <AllRooms/>
               </>
             )}
           </div>
           <div className="chat__conversation">
-            {conversation ? (
-              <Conversation activeUsers={onlineUsers} setAllRooms={setAllRooms} isModalOpen={isModalOpen} />
+            {conversationId ? (
+              <Conversation isModalOpen={isModalOpen}/>
             ) : (
               <div className="open__chat">
                 <h1>Open chat!</h1>
               </div>
             )}
           </div>
-          <ActiveUsers activeUsers={onlineUsers}/>
+          <ActiveUsers/>
         </div>
-      </ConversationContextProvider>
     </div>
   );
 };

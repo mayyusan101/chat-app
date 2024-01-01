@@ -1,10 +1,22 @@
+import { useContext } from "react";
 import { personLogo } from "../../../utils/import";
-import { getUser } from "../../../utils/localStorage";
+import { AuthContext } from "../../context/AuthContext";
+import { logout } from "../../api/api";
+import { removeToken, removeUser } from "../../../utils/localStorage";
+import { useNavigate } from "react-router-dom";
 import "./header.css";
 
 export const Header = () => {
+  const currentUser = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const currentUser = getUser();
+  const handleLogout = async() => {
+    removeToken(); // clear token
+    removeUser();
+    await logout(currentUser._id);
+    navigate("/login"); // redirect to login page
+  };
+
   return (
     <header>
       <nav className="navigation">
@@ -33,7 +45,7 @@ export const Header = () => {
           </div>
           <img src={personLogo} alt="person" className="img" />
         </div>
-        <div className="logout__icon">
+        <div className="logout__icon" onClick={handleLogout}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" width={20} height={20} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
           </svg>
@@ -42,3 +54,4 @@ export const Header = () => {
     </header>
   );
 };
+

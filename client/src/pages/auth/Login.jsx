@@ -14,9 +14,6 @@ export const Login = () => {
   const message = location.state?.message;
   const navigate = useNavigate();
 
-  const tokent = getToken();
-  console.log("login token", tokent);
-
   useEffect(() => {
     if(message ){ 
     notify({type:"warn",message:message});  // notify plesse login first

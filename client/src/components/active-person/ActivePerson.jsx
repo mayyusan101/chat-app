@@ -1,12 +1,12 @@
+import { useDispatch } from "react-redux";
 import { personLogo } from "../../../utils/import";
 import { fetchChatConversationFromDB } from "../../api/api";
 import { setConversation } from "../../store/features/conversationSlice";
 import { setMessages } from "../../store/features/messageSlice";
-import { useDispatch } from "react-redux";
-import "./chat-person.css";
+import "./active-person.css";
 
 
-export const ChatPerson = ({ chatUser }) => {
+export const ActivePerson = ({chatUser}) => {
   const dispatch = useDispatch();
 
   const startConveration = async () => {
@@ -20,12 +20,15 @@ export const ChatPerson = ({ chatUser }) => {
   };
 
   return (
-    <div className="chat__person" onClick={startConveration}>
-      <img src={personLogo} alt="person" className="img" />
-      <div className="img_left">
-        <h2 className="person__name">{chatUser.name}</h2>
-        <p className="person__text">name: some text</p>
+    <div className="active__person" onClick={startConveration}>
+      <div className="active__img">
+        <img src={personLogo} alt="person" />
+        <div className="active__light"></div>
       </div>
+      <div className="active__name">
+        <h2 className="person__name">{chatUser?.name}</h2>
+      </div>
+      
     </div>
   );
 };

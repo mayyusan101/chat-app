@@ -30,8 +30,8 @@ const userSchema = new Schema({
 // });
 
 // hide password field
-// userSchema.set('toJSON', {
-//   transform: (doc, { __v, password, token, ...rest }, options) => rest
-// });
+userSchema.set('toJSON', {
+  transform: (doc, { __v, password, token, ...rest }, options) => rest
+});
 
 module.exports = mongoose.model("User", userSchema);

@@ -32,8 +32,20 @@ const postMessage = async (req, res, next) => {
   }
 };
 
+const deleteMessages = async(chatId) => {
+  try {
+    const conversationId = new mongoose.Types.ObjectId(chatId);
+    await Message.deleteMany({conversationId: conversationId});
+  } catch (err) {
+    const error = new Error(err);
+    error.statusCode = 500;
+    return next(error);
+  }
+}
+
 
 module.exports = {
   getMessages,
-  postMessage
+  postMessage,
+  deleteMessages
 };

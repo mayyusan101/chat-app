@@ -1,53 +1,56 @@
-import { useContext, useEffect, useState } from "react";
-import "./chat-input.css";
-import { ConversationContext } from "../../context/ConversationConext";
-import { postMessage } from "../../api/api";
-import { getUser } from "../../../utils/localStorage";
+import { useContext, useState } from "react";
+import { postMessageToDB } from "../../api/api";
 import socket from "../../services/socketService";
+import { useDispatch, useSelector } from "react-redux";
+import { sendMessage } from "../../store/features/messageSlice";
+import { AuthContext } from "../../context/AuthContext";
+import "./chat-input.css";
 
-
-export const ChatInput = ({onSendMessage, conversationType, conversationId}) => {
+export const ChatInput = () => {
   const [message, setMessage] = useState("");
-  const { conversation } = useContext(ConversationContext);
+  const dispatch = useDispatch();
 
-  const currentUser = getUser();
+  const conversation = useSelector(state => state.conversation);
+
+  const currentUser = useContext(AuthContext);
 
   const handleChange = (event) => {
     setMessage(event.target.value);
   };
 
-  const postMessageToDB = async() => {
-    const response = await postMessage({
+  const postMessage = async() => {
+    await postMessageToDB({
       message: message,
-      conversationId: conversation.data._id
+      conversationId: conversation._id
     });
   };
+
   const emitSocketMessage = () => {
-    if(conversation.data.isRoom === false){
+    if(conversation.isRoom === false){
       socket.emit("sendMessage",{
         senderId: currentUser._id,
-        receiverId: conversation.data.users[0]._id,
+        receiverId: conversation.users[0]._id,
         text: message
       });
     }else{
       socket.emit("roomMessage",{
         senderId: currentUser._id,
-        roomId: conversation.data._id,
+        roomId: conversation._id,
         text: message
       });
     }
   };
 
-  const sendMessage = async() => {
+  const handleSendMessage = async() => {
     if(!message)return; // no message return
     const msg = {
       text: message,
       sender: currentUser,
       _id: Math.random(10000)
-    }
-    if(conversation.data.isRoom === false) onSendMessage(msg); // append directly in UI(only for chat message)
+    };
+    if(conversation.isRoom === false) dispatch(sendMessage(msg)); // append directly in UI(only for chat message)
     emitSocketMessage();  //emit socket
-    await postMessageToDB(); // send message to DB
+    await postMessage(); // send message to DB
     setMessage(""); // clear text box
   }
 
@@ -57,12 +60,12 @@ export const ChatInput = ({onSendMessage, conversationType, conversationId}) => 
         <div className="chat__input">
           <input type="text"  value={message} onChange={handleChange} 
              onKeyDown={(e) => {
-            if (e.key === "Enter")sendMessage();
+            if (e.key === "Enter")handleSendMessage();
             }}
           />
         </div>
         <div className="send__icon"
-          onClick={sendMessage}
+          onClick={handleSendMessage}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

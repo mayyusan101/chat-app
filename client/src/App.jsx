@@ -1,19 +1,20 @@
-import { useEffect, useState } from 'react';
-import './App.css'
-import { AuthContextProvider } from './context/AuthContext.jsx';
 import { Chat, Header } from '../utils/import.js';
-import { getToken, getUser } from '../utils/localStorage.js';
-import { Navigate } from 'react-router-dom';
+import { store } from './store/store.js'
+import { Provider } from 'react-redux'
+import { AuthContextProvider } from './context/AuthContext.jsx';
+import { getUser } from '../utils/localStorage.js';
+import './App.css'
+
 
 function App() {
-  // get user data from localStorage
-  const [user, setUser] = useState(getUser());
   return (
     <>
-      <AuthContextProvider value={user}>
-        <Header />
-        <Chat />
-      </AuthContextProvider>
+      <Provider store={store}>
+        <AuthContextProvider value={getUser() || null}>
+          <Header />
+          <Chat />
+        </AuthContextProvider>
+      </Provider>
     </>
   )
 }

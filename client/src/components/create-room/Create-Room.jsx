@@ -1,12 +1,13 @@
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
-import { createRoom } from "../../api/api";
-import "./create-room.css";
-import { useEffect, useState } from "react";
-import { getUser } from "../../../utils/localStorage";
+import { createRoomToDB } from "../../api/api";
+import { useContext, useState } from "react";
 import socket from "../../services/socketService";
+import { useSelector } from "react-redux";
+import { AuthContext } from "../../context/AuthContext";
+import "./create-room.css";
 
-export const CreateRoom = ({allUsers, onModalOpen}) => {
+export const CreateRoom = ({onModalOpen}) => {
   
   const [modal, setModal] = useState(false);
   const [roomName, setRoomName] = useState("");
@@ -14,7 +15,9 @@ export const CreateRoom = ({allUsers, onModalOpen}) => {
 
   const animatedComponents = makeAnimated();
 
-  const currentUser = getUser();
+  const allUsers = useSelector(state => state.chatUsers.allUsers); // reterive allUsers from store
+
+  const currentUser = useContext(AuthContext);
   // all users
   const options = allUsers.map((user) => ({
     value: user._id,
@@ -33,12 +36,13 @@ export const CreateRoom = ({allUsers, onModalOpen}) => {
       const selectedUserIds = selectedOptions.map((value) => ({
         id: value.value,
       }));
-      const response = await createRoom({ roomName, users: [...selectedUserIds, currentUser._id] });
+      const response = await createRoomToDB({ roomName, users: [...selectedUserIds, currentUser._id] });
       toggleModal(); // close modal
       socket.emit("roomChat",{
         roomName: roomName,
         userId: currentUser._id,
-        roomId: response.data._id
+        roomId: response.data._id,
+        membersIds: selectedUserIds
       });
     } catch (err) {
       console.log(err);

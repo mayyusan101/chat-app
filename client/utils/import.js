@@ -14,7 +14,7 @@ import { ChatInput } from "../src/components/chat-input/ChatInput";
 import { SwitchChat } from "../src/components/switch-chat/SwitchChat";
 import { ChatPerson } from "../src/components/chat-person/ChatPerson";
 import { RoomChat } from "../src/components/room-chat/RoomChat";
-import { ActivePerson } from "../src/components/active/ActivePerson";
+import { ActivePerson } from "../src/components/active-person/ActivePerson";
 import { SearchChat } from "../src/components/switch-chat/SearchChat";
 import { CreateRoom } from "../src/components/create-room/Create-Room";
 
