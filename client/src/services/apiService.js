@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken, removeToken, removeUser } from "../../utils/localStorage";
+import { getToken, removeToken, removeUser } from "../utils/localStorage";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,7 +12,6 @@ api.interceptors.request.use(
   (config) => {
     const authToken = getToken();
     if (authToken) {
-
       config.headers.Authorization = `Bearer ${authToken}`;
     }
     config.headers["Content-Type"] = "application/json";
@@ -36,12 +35,10 @@ api.interceptors.response.use(
       console.log("Unauthorized: token.");
       removeUser();
       removeToken();
-      window.location.href = "/login"; // redirect to login 
+      window.location.href = "/login"; // redirect to login
     }
     return Promise.reject(error);
   }
 );
 
 export default api;
-
-

@@ -27,7 +27,6 @@ const getUsers = () => {
 const removeUser = () => {};
 
 io.on("connection", (socket) => {
-  
 
   // Event handler for the "userConnected" event
   socket.on('userConnected', (userId) => {
@@ -36,11 +35,9 @@ io.on("connection", (socket) => {
   io.emit("connectedUsers", Object.values(connectedUsers));   
   });
 
-  // listen for room
+  // listen for room chat
   socket.on("roomChat", ({membersIds, roomId, userId}) => {
     socket.join(roomId); // join room
-  
-    console.log("connectedUsers in socket", connectedUsers);
     membersIds?.map(member => {
       for (const [socketId, userId] of Object.entries(connectedUsers)) {
         if(member.id === userId){
@@ -50,19 +47,25 @@ io.on("connection", (socket) => {
     });
     io.to(roomId).emit("roomChat");
   });
-
+  // listen for room chat message
   socket.on("roomMessage", ({roomId, senderId, text}) => {
     const details = {
       senderId,
       text,
     }
-
     io.to(roomId).emit("roomMessage", details); // emit message
-  })
+  });
+  // listen for room chat message
+  socket.on("roomRemove", ({roomId, senderId}) => {
+    const details = {
+      roomId,
+      senderId
+    }
+    io.to(roomId).emit("roomRemove", details); // emit message
+  });
 
 
-
-  // Event for "sendMessage" event
+  // listen for one to one chat message
   socket.on("sendMessage", ({senderId, receiverId, text}) => {
     for (const [socketId, userId] of Object.entries(connectedUsers)) {
       if(userId==receiverId){
@@ -73,7 +76,6 @@ io.on("connection", (socket) => {
         socket.to(socketId).emit("sendMessage", details); // emit message // One Account can have Multiple Socket Connection
       }
     };
-    
   })
   
 

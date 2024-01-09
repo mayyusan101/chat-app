@@ -30,7 +30,6 @@ const postMessageToDB = async ({ message, conversationId }) => {
         conversationId,
       }
     );
-    const res = response.data;
     return response.data;
   } catch (error) {
     console.error("Error fetching message data:", error);
@@ -119,7 +118,6 @@ const logout = async (userId) => {
         userId: userId
       }
     );
-    console.log("logout respone", logout);
     return response.data;
   } catch (error) {
     console.error("Error fetching leave room data:", error);
@@ -127,6 +125,19 @@ const logout = async (userId) => {
   }
 };
 
+const setUserAratarToDB = async(image) => {
+  try {
+    const response = await api.post(
+      '/users/set-avatar',
+      {
+        image: image
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error set user avatar:", error);
+    throw error;
+  }
+}
 
-
-export { fetchAllUsersFromDB, fetchChatConversationFromDB, postMessageToDB, fetchAllRoomsFromDB, createRoomToDB, fetchRoomConversationFromDB, leaveRoomToDB, removeRoomToDB, logout };
+export { fetchAllUsersFromDB, fetchChatConversationFromDB, postMessageToDB, fetchAllRoomsFromDB, createRoomToDB, fetchRoomConversationFromDB, leaveRoomToDB, removeRoomToDB, logout, setUserAratarToDB };

@@ -4,13 +4,9 @@ const { getAllRooms, createRoom, getRoomConversation, leaveRoom, removeRoom } = 
 
 
 router.get('/', getAllRooms);
-
 router.post('/', createRoom);
-
 router.get('/:roomId', getRoomConversation);
-
 router.post('/leave', leaveRoom);
-
 router.post('/remove', removeRoom);
 
 module.exports = router;

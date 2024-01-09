@@ -1,30 +1,37 @@
-const Message = require("../models/message");
+const Chat = require("../models/chat");
 const mongoose = require("mongoose");
 
 const getMessages = async (conversationId) => {
   try {
-    const messages = await Message.find({ conversationId: conversationId }).populate([
-      "sender"
-    ]);
+    const messages = await Chat.findById(conversationId)
+      .select("messages")
+      .exec();
     return messages ? messages : null;
   } catch (err) {
     return next(err);
   }
 };
 
-
 const postMessage = async (req, res, next) => {
   try {
     const text = req.body.message;
     const sender = req.user._id; // current user
-    // const receivers = new mongoose.Types.ObjectId(req.body.receiverId);
     const conversationId = new mongoose.Types.ObjectId(req.body.conversationId);
-    await Message.create({
-      text,
-      sender,
+
+    await Chat.findByIdAndUpdate(
       conversationId,
-    });
-    res.status(201).json({ message: "success" });
+      {
+        $push: {
+          messages: {
+            // push message to messages []
+            text,
+            sender,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    return res.status(201).json({ message: "message success" });
   } catch (err) {
     const error = new Error(err);
     error.statusCode = 500;
@@ -32,20 +39,7 @@ const postMessage = async (req, res, next) => {
   }
 };
 
-const deleteMessages = async(chatId) => {
-  try {
-    const conversationId = new mongoose.Types.ObjectId(chatId);
-    await Message.deleteMany({conversationId: conversationId});
-  } catch (err) {
-    const error = new Error(err);
-    error.statusCode = 500;
-    return next(error);
-  }
-}
-
-
 module.exports = {
   getMessages,
   postMessage,
-  deleteMessages
 };

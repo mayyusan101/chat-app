@@ -4,5 +4,4 @@ const { postMessage } = require("../controllers/MessageController")
 
 router.post("/", postMessage);
 
-
 module.exports = router;
