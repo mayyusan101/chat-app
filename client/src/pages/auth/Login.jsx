@@ -40,7 +40,7 @@ export const Login = () => {
           setUser(response.data.data.user); // set user data to localStorage
           setToken(response.data.data.token); // set refresh-token to localStorage
           notify({ type: "success", message: response.data.message });
-          navigate("/");
+          navigate("/", { replace: true });
         }
       } catch (err) {
         console.log(err.response.data.message);

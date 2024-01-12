@@ -30,7 +30,7 @@ export const ProfilePicker = () => {
       currentUser.profile = image;
       setUser(currentUser); // set profile
       notify({ type: "error", message: err.response.data.message });
-      navigate("/"); // goto home page
+      navigate("/", { replace: true }); // goto home page
     } catch (err) {
       console.log(err);
     }

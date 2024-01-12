@@ -32,7 +32,7 @@ export const Register = () => {
         setUser(response.data.data.user); 
         setToken(response.data.data.token); 
         notify({ type: "success", message: response.data.message });
-        navigate("/profile-picker"); // goto profile picker
+        navigate("/profile-picker", { replace: true }); // goto profile picker
       } catch (err) {
         console.log(err.response.data.message);
         notify({ type: "error", message: err.response.data.message });
